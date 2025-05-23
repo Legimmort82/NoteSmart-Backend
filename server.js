@@ -1,23 +1,37 @@
 require("dotenv").config();
 const express = require("express");
-const connectToDB = require('./Database/db')
-const AuthRoutes = require('./Routes/AuthRoutes')
+const cors = require("cors");
+const connectToDB = require("./Database/db");
+const AuthRoutes = require("./Routes/AuthRoutes");
+const NotesRoutes = require("./Routes/NotesRoutes");
 
 // create app
 const app = express();
 
 // Listen Port
-const PORT = process.env.PORT 
+const PORT = process.env.PORT;
 
 // connect to db
-connectToDB()
+connectToDB();
+
+app.use(
+  cors({
+    origin: "http://localhost:3001", // فقط به این origin اجازه دسترسی بده
+    methods: ["GET", "POST", "PUT", "DELETE"], // متدهای مجاز
+    allowedHeaders: ["Content-Type", "Authorization"], // هدرهای مجاز
+  })
+);
 
 // express middleware
 app.use(express.json());
 
-// Routes
-app.use('/api',AuthRoutes)
+// app.use((req, res) => {
+//   res.status(404).json({ message: 'مسیر یافت نشد' });
+// });
 
+// Routes
+app.use("/api", AuthRoutes);
+app.use("/api", NotesRoutes);
 
 app.listen(PORT, () => {
   console.log(`this is test ${PORT}`);

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const connectToDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/");
+    await mongoose.connect("mongodb://localhost:27017/note-app");
     console.log("connected successfully");
   } catch (error) {
     console.log(error);

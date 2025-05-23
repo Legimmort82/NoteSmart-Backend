@@ -1,12 +1,11 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require('jsonwebtoken')
+
 const Register = async (req, res) => {
   try {
-    const { username, password, email, role } = req.body;
-    const checkUserRegistered = await User.findOne({
-      $or: [{ username }, { email }],
-    });
+    const { password,  email } = req.body;
+    const checkUserRegistered = await User.findOne({email});
     if (checkUserRegistered) {
       return res.status(400).json({
         success: false,
@@ -18,16 +17,22 @@ const Register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newlyUser = new User({
-      username,
       password: hashedPassword,
       email,
-      role: role || "user",
     });
 
     await newlyUser.save();
 
+    const token = jwt.sign(
+      { userId: newlyUser._id, email: email },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '6h' }
+    );
+
     if (newlyUser) {
       return res.status(201).json({
+        token,
+        userId: newlyUser._id,
         success: true,
         message: "User registered successfully!",
       });
@@ -48,10 +53,10 @@ const Register = async (req, res) => {
 
 const Login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "User doesn't exists",
       });
@@ -60,7 +65,7 @@ const Login = async (req, res) => {
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
@@ -69,8 +74,7 @@ const Login = async (req, res) => {
     const accessToken = jwt.sign(
         {
           userId: user._id,
-          username: user.username,
-          role: user.role,
+          email: user.email
         },
         process.env.JWT_SECRET_KEY,
         {
@@ -81,7 +85,8 @@ const Login = async (req, res) => {
       return res.status(200).json({
         success:true,
         message : "Logged in successfully",
-        accessToken : accessToken
+        token : accessToken,
+        userId : user._id
       })
   } catch (error) {
     console.log(error);
