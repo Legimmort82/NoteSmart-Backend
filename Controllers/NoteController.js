@@ -10,11 +10,17 @@ const GetAllNotes = async (req, res) => {
 };
 const CreateNote = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, date, description, color, tag, isFavorite, isTrash } =
+      req.body;
     const note = new Note({
       title,
-      content,
+      date,
       user: req.user.userId,
+      description,
+      color,
+      tag,
+      isFavorite,
+      isTrash,
     });
     await note.save();
     res.status(201).json({
@@ -26,36 +32,35 @@ const CreateNote = async (req, res) => {
     res.status(500).json({ message: "خطای سرور" });
   }
 };
- const GetSingleNote = async (req,res)=>{
-try {
-  const {id}= req.params
-  const note = await Note.find({_id:id,user:req.user.userId})
-  if (!note){
-    return res.status(404).json({
-      success: false,
-      message: "Note not found with this id"
-    })
+const GetSingleNote = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const note = await Note.find({ _id: id, user: req.user.userId });
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found with this id",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Note fetched successfully",
+      data: note,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "خطای سرور" });
   }
-  return res.status(200).json({
-    success: true,
-    message : "Note fetched successfully",
-    data : note
-  })
-} catch (error) {
-  res.status(500).json({ message: "خطای سرور" });
-}
-
- }
+};
 const UpdateNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, date, description, color, tag, isFavorite, isTrash } = req.body;
 
     // بررسی وجود عنوان و محتوا
-    if (!title || !content) {
+    if (!title || !description || !tag) {
       return res.status(400).json({
         success: false,
-        message: "عنوان و محتوای نوت الزامی هستند",
+        message: "عنوان نوت الزامی هستند",
       });
     }
 
@@ -67,8 +72,13 @@ const UpdateNote = async (req, res) => {
       },
       {
         title,
-        content,
-        updatedAt: Date.now(),
+        date,
+        user: req.user.userId,
+        description,
+        color,
+        tag,
+        isFavorite,
+        isTrash,
       },
       { new: true } // برای برگشت نسخه به‌روزرسانی شده
     );
@@ -125,4 +135,10 @@ const DeleteNote = async (req, res) => {
   }
 };
 
-module.exports = { GetAllNotes, CreateNote, UpdateNote, DeleteNote,GetSingleNote };
+module.exports = {
+  GetAllNotes,
+  CreateNote,
+  UpdateNote,
+  DeleteNote,
+  GetSingleNote,
+};
