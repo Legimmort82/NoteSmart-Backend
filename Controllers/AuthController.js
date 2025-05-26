@@ -97,4 +97,34 @@ const Login = async (req, res) => {
   }
 };
 
-module.exports = {Register,Login};
+const Validate = async(req,res) =>{
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ valid: false });
+    }
+
+    // بررسی اعتبار توکن
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    
+    // دریافت اطلاعات کاربر از دیتابیس
+    const user = await User.findById(decoded.userId).select('-password');
+    
+    if (!user) {
+      return res.status(401).json({ valid: false });
+    }
+
+    res.json({
+      valid: true,
+      user: {
+        id: user._id,
+        email: user.email,
+      }
+    });
+  } catch (error) {
+    res.status(401).json({ valid: false });
+  }
+}
+
+module.exports = {Register,Login,Validate};
