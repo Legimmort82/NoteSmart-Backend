@@ -16,7 +16,7 @@ connectToDB();
 
 app.use(
   cors({
-    origin: "http://localhost:3001", // فقط به این origin اجازه دسترسی بده
+    origin: "https://note-m554xvvm1-mhsalims-projects.vercel.app", // فقط به این origin اجازه دسترسی بده
     methods: ["GET", "POST", "PUT", "DELETE"], // متدهای مجاز
     allowedHeaders: ["Content-Type", "Authorization"], // هدرهای مجاز
   })
