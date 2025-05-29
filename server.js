@@ -16,7 +16,7 @@ connectToDB();
 
 app.use(
   cors({
-    origin: "https://note-app-rho-six.vercel.app/", // فقط به این origin اجازه دسترسی بده
+    origin: "https://note-app-rho-six.vercel.app", // فقط به این origin اجازه دسترسی بده
     methods: ["GET", "POST", "PUT", "DELETE"], // متدهای مجاز
     allowedHeaders: ["Content-Type", "Authorization"], // هدرهای مجاز
     credentials: true
