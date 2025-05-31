@@ -2,10 +2,10 @@ const Note = require("../Models/Note");
 
 const GetAllNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user.userId }).sort("-createdAt");
+    const notes = await Note.find({ user: req.user.userId });
     res.json(notes);
   } catch (error) {
-    res.status(500).json({ message: "خطای سرور" });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 const CreateNote = async (req, res) => {
@@ -25,11 +25,11 @@ const CreateNote = async (req, res) => {
     await note.save();
     res.status(201).json({
       success: true,
-      message: "موفقیت آمیز",
+      message: "Note created successfully",
       data: note,
     });
   } catch (error) {
-    res.status(500).json({ message: "خطای سرور" });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 const GetSingleNote = async (req, res) => {
@@ -48,7 +48,7 @@ const GetSingleNote = async (req, res) => {
       data: note,
     });
   } catch (error) {
-    res.status(500).json({ message: "خطای سرور" });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 const UpdateNote = async (req, res) => {
@@ -60,7 +60,7 @@ const UpdateNote = async (req, res) => {
     if (!title || !description || !tag) {
       return res.status(400).json({
         success: false,
-        message: "عنوان نوت الزامی هستند",
+        message: "Note title is required",
       });
     }
 
@@ -86,20 +86,19 @@ const UpdateNote = async (req, res) => {
     if (!updatedNote) {
       return res.status(404).json({
         success: false,
-        message: "نوت یافت نشد یا شما مجوز ویرایش آن را ندارید",
+        message: "Note is not found or you do not have access to update it",
       });
     }
 
     return res.status(200).json({
       success: true,
       data: updatedNote,
-      message: "نوت با موفقیت به‌روزرسانی شد",
+      message: "Note updated successfully",
     });
   } catch (error) {
-    console.error("خطا در به‌روزرسانی نوت:", error);
     return res.status(500).json({
       success: false,
-      message: "خطای سرور در به‌روزرسانی نوت",
+      message: "Server Error",
     });
   }
 };
@@ -117,20 +116,19 @@ const DeleteNote = async (req, res) => {
     if (!deletedNote) {
       return res.status(404).json({
         success: false,
-        message: "نوت یافت نشد یا شما مجوز حذف آن را ندارید",
+        message: "Note is not found or you do not have access to delete it",
       });
     }
 
     return res.status(200).json({
       success: true,
       data: deletedNote,
-      message: "نوت با موفقیت حذف شد",
+      message: "Note deleted successfully",
     });
   } catch (error) {
-    console.error("خطا در حذف نوت:", error);
     return res.status(500).json({
       success: false,
-      message: "خطای سرور در حذف نوت",
+      message: "Server Error",
     });
   }
 };
