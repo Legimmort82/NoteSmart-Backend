@@ -23,7 +23,6 @@ const NoteSchema = new Schema<INote>({
   },
   date: {
     type: String,
-    required: true,
   },
   description: {
     type: String,

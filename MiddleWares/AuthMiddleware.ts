@@ -10,21 +10,19 @@ interface MyJwtPayload extends JwtPayload {
   email: string;
 }
 
-const AuthMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const AuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
+  let token = authHeader && authHeader.split(" ")[1];
+  if (!token && req.cookies?.token) {
+    token = req.cookies.token;
+  }
   if (!token) {
     return res.status(401).json({
       success: false,
       message: "لطفاً برای دسترسی وارد شوید",
     });
   }
-const customReq = req as CustomRequest
+  const customReq = req as CustomRequest;
   try {
     const decodedTokenInfo = jwt.verify(
       token,
@@ -44,4 +42,4 @@ const customReq = req as CustomRequest
   }
 };
 
-export {AuthMiddleware};
+export { AuthMiddleware };

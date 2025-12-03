@@ -34,6 +34,8 @@ const CreateNote = async (req:Request, res:Response) => {
       data: note,
     });
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ message: "Server Error" });
   }
 };
