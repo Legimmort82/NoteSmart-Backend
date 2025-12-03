@@ -1,21 +1,26 @@
-const Note = require("../Models/Note");
-
-const GetAllNotes = async (req, res) => {
+import {Note,INote} from "../Models/Note"
+import {Request,Response} from "express"
+interface CustomRequest extends Request{
+  user:{userId: string}
+}
+const GetAllNotes = async (req:Request, res:Response) => {
+   const customReq = req as CustomRequest;
   try {
-    const notes = await Note.find({ user: req.user.userId }).sort("-createdAt");
+    const notes : INote[] = await Note.find({ user: customReq.user.userId }).sort("-createdAt");
     res.json(notes);
   } catch (error) {
     res.status(500).json({ message: "خطای سرور" });
   }
 };
-const CreateNote = async (req, res) => {
+const CreateNote = async (req:Request, res:Response) => {
+  const customReq = req as CustomRequest;
   try {
     const { title, date, description, color, tag, isFavorite, isTrash } =
       req.body;
     const note = new Note({
       title,
       date,
-      user: req.user.userId,
+      user: customReq.user.userId,
       description,
       color,
       tag,
@@ -32,10 +37,11 @@ const CreateNote = async (req, res) => {
     res.status(500).json({ message: "خطای سرور" });
   }
 };
-const GetSingleNote = async (req, res) => {
+const GetSingleNote = async (req:Request, res:Response) => {
+  const customReq = req as CustomRequest;
   try {
     const { id } = req.params;
-    const note = await Note.find({ _id: id, user: req.user.userId });
+    const note :INote[]= await Note.find({ _id: id, user: customReq.user.userId });
     if (!note) {
       return res.status(404).json({
         success: false,
@@ -51,12 +57,12 @@ const GetSingleNote = async (req, res) => {
     res.status(500).json({ message: "خطای سرور" });
   }
 };
-const UpdateNote = async (req, res) => {
+const UpdateNote = async (req:Request, res:Response) => {
+  const customReq = req as CustomRequest;
   try {
     const { id } = req.params;
     const { title, date, description, color, tag, isFavorite, isTrash } = req.body;
 
-    // بررسی وجود عنوان و محتوا
     if (!title || !description || !tag) {
       return res.status(400).json({
         success: false,
@@ -64,23 +70,22 @@ const UpdateNote = async (req, res) => {
       });
     }
 
-    // یافتن و به‌روزرسانی نوت
     const updatedNote = await Note.findOneAndUpdate(
       {
         _id: id,
-        user: req.user.userId, // فقط نوت‌های متعلق به کاربر جاری
+        user: customReq.user.userId,
       },
       {
         title,
         date,
-        user: req.user.userId,
+        user: customReq.user.userId,
         description,
         color,
         tag,
         isFavorite,
         isTrash,
       },
-      { new: true } // برای برگشت نسخه به‌روزرسانی شده
+      { new: true }
     );
 
     if (!updatedNote) {
@@ -104,14 +109,15 @@ const UpdateNote = async (req, res) => {
   }
 };
 
-const DeleteNote = async (req, res) => {
+const DeleteNote = async (req:Request, res:Response) => {
+  const customReq = req as CustomRequest;
   try {
     const { id } = req.params;
 
     // یافتن و حذف نوت
     const deletedNote = await Note.findOneAndDelete({
       _id: id,
-      user: req.user.userId, // فقط نوت‌های متعلق به کاربر جاری
+      user: customReq.user.userId, // فقط نوت‌های متعلق به کاربر جاری
     });
 
     if (!deletedNote) {
@@ -135,7 +141,7 @@ const DeleteNote = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   GetAllNotes,
   CreateNote,
   UpdateNote,

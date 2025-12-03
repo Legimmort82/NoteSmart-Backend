@@ -1,11 +1,12 @@
-const bcrypt = require("bcrypt");
-const User = require("../models/User");
-const jwt = require('jsonwebtoken')
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { User, IUser } from "../Models/User";
+import { Response, Request } from "express";
 
-const Register = async (req, res) => {
+const Register = async (req: Request, res: Response) => {
   try {
-    const { password,  email } = req.body;
-    const checkUserRegistered = await User.findOne({email});
+    const { password, email } = req.body;
+    const checkUserRegistered: IUser[] | null = await User.findOne({ email });
     if (checkUserRegistered) {
       return res.status(400).json({
         success: false,
@@ -25,9 +26,16 @@ const Register = async (req, res) => {
 
     const token = jwt.sign(
       { userId: newlyUser._id, email: email },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: '14d' }
+      process.env.JWT_SECRET_KEY!,
+      { expiresIn: "14d" }
     );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 15,
+    });
 
     if (newlyUser) {
       return res.status(201).json({
@@ -43,15 +51,14 @@ const Register = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
-     return res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Something went wrong! Please try again",
     });
   }
 };
 
-const Login = async (req, res) => {
+const Login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -71,25 +78,31 @@ const Login = async (req, res) => {
       });
     }
 
-    const accessToken = jwt.sign(
-        {
-          userId: user._id,
-          email: user.email
-        },
-        process.env.JWT_SECRET_KEY,
-        {
-          expiresIn: "14d",
-        }
-      );
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET_KEY!,
+      {
+        expiresIn: "14d",
+      }
+    );
 
-      return res.status(200).json({
-        success:true,
-        message : "Logged in successfully",
-        token : accessToken,
-        userId : user._id
-      })
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 15,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      token: token,
+      userId: user._id,
+    });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Something went wrong! Please try again",
@@ -97,34 +110,17 @@ const Login = async (req, res) => {
   }
 };
 
-const Validate = async(req,res) =>{
+const Token = (req: Request, res: Response) => {
+  const token = req.cookies?.token;
+
+  if (!token) return res.status(401).json({ user: null });
+
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    
-    if (!token) {
-      return res.status(401).json({ valid: false });
-    }
-
-    // بررسی اعتبار توکن
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    
-    // دریافت اطلاعات کاربر از دیتابیس
-    const user = await User.findById(decoded.userId).select('-password');
-    
-    if (!user) {
-      return res.status(401).json({ valid: false });
-    }
-
-    res.json({
-      valid: true,
-      user: {
-        id: user._id,
-        email: user.email,
-      }
-    });
-  } catch (error) {
-    res.status(401).json({ valid: false });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!);
+    res.json({ user: decoded });
+  } catch {
+    res.status(401).json({ user: null });
   }
-}
+};
 
-module.exports = {Register,Login,Validate};
+export { Register, Login, Token };
