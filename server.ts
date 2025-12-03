@@ -29,7 +29,7 @@ app.use(express.json());
 
 // Routes
 app.use("", AuthRouter);
-app.use("/api", NoteRouter);
+app.use("", NoteRouter);
 
 app.listen(PORT, () => {
   console.log(`this is test ${PORT}`);
