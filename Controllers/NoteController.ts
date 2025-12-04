@@ -1,18 +1,50 @@
-import {Note,INote} from "../Models/Note"
-import {Request,Response} from "express"
-interface CustomRequest extends Request{
-  user:{userId: string}
+import { Note, INote } from "../Models/Note";
+import { Request, Response } from "express";
+
+interface CustomRequest extends Request {
+  user: { userId: string };
 }
-const GetAllNotes = async (req:Request, res:Response) => {
-   const customReq = req as CustomRequest;
+
+const GetAllNotes = async (req: Request, res: Response) => {
+  const customReq = req as CustomRequest;
   try {
-    const notes : INote[] = await Note.find({ user: customReq.user.userId }).sort("-createdAt");
+    const notes: INote[] = await Note.find({
+      user: customReq.user.userId,
+      isTrash: false,
+    }).sort("-createdAt");
     res.json(notes);
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
 };
-const CreateNote = async (req:Request, res:Response) => {
+
+const GetFavoriteNotes = async (req: Request, res: Response) => {
+  const customReq = req as CustomRequest;
+  try {
+    const notes: INote[] = await Note.find({
+      user: customReq.user.userId,
+      isFavorite: true,
+    }).sort("-createdAt");
+    res.json(notes);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const GetTrashNotes = async (req: Request, res: Response) => {
+  const customReq = req as CustomRequest;
+  try {
+    const notes: INote[] = await Note.find({
+      user: customReq.user.userId,
+      isTrash: true,
+    }).sort("-createdAt");
+    res.json(notes);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const CreateNote = async (req: Request, res: Response) => {
   const customReq = req as CustomRequest;
   try {
     const { title, date, description, color, tag, isFavorite, isTrash } =
@@ -35,15 +67,18 @@ const CreateNote = async (req:Request, res:Response) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     res.status(500).json({ message: "Server Error" });
   }
 };
-const GetSingleNote = async (req:Request, res:Response) => {
+const GetSingleNote = async (req: Request, res: Response) => {
   const customReq = req as CustomRequest;
   try {
     const { id } = req.params;
-    const note :INote[]= await Note.find({ _id: id, user: customReq.user.userId });
+    const note: INote[] = await Note.find({
+      _id: id,
+      user: customReq.user.userId,
+    });
     if (!note) {
       return res.status(404).json({
         success: false,
@@ -59,11 +94,12 @@ const GetSingleNote = async (req:Request, res:Response) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-const UpdateNote = async (req:Request, res:Response) => {
+const UpdateNote = async (req: Request, res: Response) => {
   const customReq = req as CustomRequest;
   try {
     const { id } = req.params;
-    const { title, date, description, color, tag, isFavorite, isTrash } = req.body;
+    const { title, date, description, color, tag, isFavorite, isTrash } =
+      req.body;
 
     if (!title || !description || !tag) {
       return res.status(400).json({
@@ -110,7 +146,7 @@ const UpdateNote = async (req:Request, res:Response) => {
   }
 };
 
-const DeleteNote = async (req:Request, res:Response) => {
+const DeleteNote = async (req: Request, res: Response) => {
   const customReq = req as CustomRequest;
   try {
     const { id } = req.params;
@@ -147,4 +183,6 @@ export {
   UpdateNote,
   DeleteNote,
   GetSingleNote,
+  GetFavoriteNotes,
+  GetTrashNotes,
 };

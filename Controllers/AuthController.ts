@@ -112,8 +112,7 @@ const Login = async (req: Request, res: Response) => {
 
 const Token = (req: Request, res: Response) => {
   const token = req.cookies?.token;
-  console.log(token);
-
+  
   if (!token) return res.status(401).json({ user: null });
 
   try {
