@@ -33,7 +33,7 @@ const Register = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
-      sameSite: "none",
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 15,
     });
 
@@ -92,7 +92,7 @@ const Login = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
-      sameSite: "none",
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 15,
     });
 
@@ -117,7 +117,7 @@ const Token = (req: Request, res: Response) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!);
-    res.json({ user: decoded });
+    res.status(200).json({ user: decoded });
   } catch {
     res.status(401).json({ user: null });
   }

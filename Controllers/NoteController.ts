@@ -71,6 +71,7 @@ const CreateNote = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 const GetSingleNote = async (req: Request, res: Response) => {
   const customReq = req as CustomRequest;
   try {
@@ -94,6 +95,7 @@ const GetSingleNote = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 const UpdateNote = async (req: Request, res: Response) => {
   const customReq = req as CustomRequest;
   try {
