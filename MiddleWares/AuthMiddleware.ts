@@ -19,7 +19,7 @@ const AuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: "لطفاً برای دسترسی وارد شوید",
+      message: "Login for access",
     });
   }
   const customReq = req as CustomRequest;
@@ -36,9 +36,9 @@ const AuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
     next();
   } catch (error: unknown) {
     if (error instanceof TokenExpiredError) {
-      return res.status(401).json({ message: "توکن منقضی شده است" });
+      return res.status(401).json({ message: "Token is expired" });
     }
-    res.status(401).json({ message: "توکن نامعتبر است" });
+    res.status(401).json({ message: "Token is invalid" });
   }
 };
 

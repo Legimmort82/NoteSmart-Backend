@@ -4,17 +4,20 @@ import { Request, Response } from "express";
 const GetCurrentUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
     const user = await User.find({ _id: id });
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User doesn't exist",
       });
     }
+
     res.status(200).json({
       success: true,
       message: "User fetched successfully",
-      user
+      user,
     });
   } catch (error) {
     console.log(error);
@@ -38,6 +41,7 @@ const UpdateUser = async (req: Request, res: Response) => {
     const updateUser = await User.findByIdAndUpdate(id, updateFields, {
       new: true,
     });
+
     if (!updateUser) {
       return res.status(404).json({
         success: false,
